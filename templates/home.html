@@ -1,16 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="home">
-  <h3>Choose a cover</h3>
-  <div class="themes">
-    {% for t in themes %}
-      <div class="theme-card {{ t.class }}" onclick="chooseTheme('{{ t.class }}')">
-        <div class="theme-name">{{ t.name }}</div>
-      </div>
-    {% endfor %}
-  </div>
+<div class="home" style="text-align:center; margin-top:30px;">
 
-  <h3>Genres</h3>
+  <!-- Welcome message -->
+  <h1 style="font-size: 36px; color: #4B0082;">Welcome, {{ user_name }}!</h1>
+  <p style="font-size: 14px; color: #888;">by Sangeetha</p>
+  <p>Glad to see you today. 🌸</p>
+
+  <!-- Genres section -->
+  <h3 style="margin-top:40px;">Genres</h3>
   <div class="genres">
     <a class="genre" href="/genre/diary">Diary</a>
     <a class="genre" href="/genre/habit">Habit Tracker</a>
@@ -18,7 +16,9 @@
     <a class="genre" href="/genre/challenge21">21 Days Challenge</a>
     <a class="genre" href="/genre/todo">To Do</a>
   </div>
+
 </div>
+
 <script>
 function chooseTheme(c){
   document.querySelector('.page').className = 'page '+c;
