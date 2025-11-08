@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>21 Days Challenge</h2>
+<button class="btn-warning" onclick="loadPrevious()">View Previous Entries</button>
+<div id="previous-entries"></div>
+
+<div id="challenges-wrap"></div>
+<div class="row">
+  <button class="btn-success" onclick="saveChallenges()">Save</button>
+  <div id="challenge-time" class="meta"></div>
+</div>
+
+<script>
+const challenges = ['Drink 2L Water','Meditate','Exercise','Read 30 min','No Sugar','Learn Coding','Violin','Journal','Gratitude','Declutter','Walk 5000 Steps','Sleep 7-8 hrs','No Social Media','Plan Next Day','Healthy Breakfast','Stretching','Compliment','No Negative Thoughts','Learn 1 New Word','Herbal Tea','Mindful Breathing'];
+const days=21;
+let data=challenges.map(c=>({name:c, days:{}}));
+
+function renderChallenges(){
+  const wrap = document.getElementById('challenges-wrap');
+  wrap.innerHTML='';
+  data.forEach((c,ci)=>{
+    const table = document.createElement('table');
+    table.className='habit-table';
+    let head='<tr><th>'+c.name+'</th>';
+    for(let i=1;i<=days;i++){ head+=`<th>D${i}</th>`; }
+    head+='</tr>'; table.innerHTML=head;
+    const row=document.createElement('tr');
+    row.innerHTML=`<td></td>`+Array.from({length:days}).map((_,i)=>{
+      const key='d'+(i+1); return `<td><input type=checkbox data-c="${ci}" data-day="${key}" ${c.days[key]?'checked':''} onchange="toggleDay(this)"></td>`;
+    }).join('');
+    table.appendChild(row); wrap.appendChild(table);
+  });
+}
+
+function toggleDay(el){ const ci=el.getAttribute('data-c'); const day=el.getAttribute('data-day'); data[ci].days[day]=el.checked; }
+
+async function saveChallenges(){
+  const res = await fetch('/save_entry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({genre:'21 Days Challenge', meta:{challenges:data}})});
+  const j=await res.json();
+  document.getElementById('challenge-time').innerText=j.time; alert(j.message);
+}
+
+async function loadPrevious(){
+  const res = await fetch('/entries/21 Days Challenge');
+  const entries = await res.json();
+  const wrap = document.getElementById('previous-entries');
+  wrap.innerHTML='';
+  if(entries.length===0){ wrap.innerHTML='<p>No previous entries.</p>'; return; }
+  entries.forEach(e=>{
+    const div=document.createElement('div'); div.className='prev-entry';
+    let html=`<strong>${e.created_at}</strong><table class="habit-table"><tr><th>Challenge</th>`;
+    for(let i=1;i<=21;i++){ html+=`<th>D${i}</th>`; }
+    html+=`</tr>`;
+    e.meta.challenges.forEach(c=>{
+      html+=`<tr><td>${c.name}</td>`;
+      for(let i=1;i<=21;i++){ html+=`<td>${c.days['d'+i]?'✔️':''}</td>`; }
+      html+=`</tr>`;
+    });
+    html+=`</table><hr>`; div.innerHTML=html; wrap.appendChild(div);
+  });
+}
+
+renderChallenges();
+</script>
+{% endblock %}

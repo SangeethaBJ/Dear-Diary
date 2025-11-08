@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dear Diary</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="book">
+    <header class="topbar">
+      <div class="logo">
+        <span class="diary-emoji">📔</span>
+        <span class="project-name">Dear Diary</span>
+      </div>
+      <div class="right">
+        {% if session.user_name %}
+          <span class="welcome">Welcome, {{ session.user_name }}</span>
+          <a class="btn small" href="/logout">Logout</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <main class="page">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="flash">
+            {% for m in messages %}
+              <div>{{ m }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <script src="/static/script.js"></script>
+  </div>
+</body>
+</html>

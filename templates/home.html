@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="home">
+  <h3>Choose a cover</h3>
+  <div class="themes">
+    {% for t in themes %}
+      <div class="theme-card {{ t.class }}" onclick="chooseTheme('{{ t.class }}')">
+        <div class="theme-name">{{ t.name }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <h3>Genres</h3>
+  <div class="genres">
+    <a class="genre" href="/genre/diary">Diary</a>
+    <a class="genre" href="/genre/habit">Habit Tracker</a>
+    <a class="genre" href="/genre/manifestation">Manifestation</a>
+    <a class="genre" href="/genre/challenge21">21 Days Challenge</a>
+    <a class="genre" href="/genre/todo">To Do</a>
+  </div>
+</div>
+<script>
+function chooseTheme(c){
+  document.querySelector('.page').className = 'page '+c;
+}
+</script>
+{% endblock %}

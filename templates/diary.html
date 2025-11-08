@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Diary</h2>
+<button class="btn-warning" onclick="loadPrevious()">View Previous Entries</button>
+<div id="previous-entries"></div>
+
+<textarea id="diary-content" placeholder="Write your diary entry here..." class="big-textarea"></textarea>
+<div class="row">
+  <button class="btn-primary" onclick="saveEntry('Diary')">Save</button>
+  <div id="diary-time" class="meta"></div>
+</div>
+
+<script>
+async function saveEntry(genre){
+  const content = document.getElementById('diary-content').value;
+  const res = await fetch('/save_entry', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({genre:genre, content:content})
+  });
+  const j = await res.json();
+  document.getElementById('diary-time').innerText = j.time;
+  alert(j.message);
+}
+
+async function loadPrevious(){
+  const res = await fetch('/entries/Diary');
+  const entries = await res.json();
+  const wrap = document.getElementById('previous-entries');
+  wrap.innerHTML='';
+  if(entries.length===0){ wrap.innerHTML = '<p>No previous entries.</p>'; return; }
+  entries.forEach(e=>{
+    const div = document.createElement('div');
+    div.className='prev-entry';
+    div.innerHTML = `<strong>${e.created_at}</strong><p>${e.content}</p><hr>`;
+    wrap.appendChild(div);
+  });
+}
+</script>
+{% endblock %}

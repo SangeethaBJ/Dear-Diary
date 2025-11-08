@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Manifestation</h2>
+<button class="btn-warning" onclick="loadPrevious()">View Previous Entries</button>
+<div id="previous-entries"></div>
+
+<form id="manifestation-form">
+  <div><label>Gratitude</label><textarea rows="10" placeholder="Write gratitude..."></textarea></div>
+  <div><label>Health Affirmation</label><textarea rows="10" placeholder="Health affirmations..."></textarea></div>
+  <div><label>Wealth Affirmation</label><textarea rows="10" placeholder="Wealth affirmations..."></textarea></div>
+  <div><label>Relationship Affirmation</label><textarea rows="10" placeholder="Relationship affirmations..."></textarea></div>
+  <div><label>Special Goals</label><textarea rows="10" placeholder="Monthly goals..."></textarea></div>
+  <button type="button" class="btn-success" onclick="saveManifestation()">Save</button>
+  <div id="manifestation-time" class="meta"></div>
+</form>
+
+<script>
+async function saveManifestation(){
+  const textareas = document.querySelectorAll('#manifestation-form textarea');
+  const content = Array.from(textareas).map(t => t.value);
+  const res = await fetch('/save_entry',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({genre:'Manifestation', meta:{sections: content}})
+  });
+  const j = await res.json();
+  document.getElementById('manifestation-time').innerText = j.time;
+  alert(j.message);
+}
+async function loadPrevious(){
+  const res = await fetch('/entries/Manifestation');
+  const entries = await res.json();
+  const wrap = document.getElementById('previous-entries');
+  wrap.innerHTML='';
+  if(entries.length===0){ wrap.innerHTML = '<p>No previous entries.</p>'; return; }
+  entries.forEach(e=>{
+    const div = document.createElement('div');
+    div.className='prev-entry';
+    let html = `<strong>${e.created_at}</strong><br>`;
+    const sections = ['Gratitude','Health','Wealth','Relationship','Goals'];
+    e.meta.sections.forEach((sec,i)=>{ html += `<strong>${sections[i]}:</strong><br>${sec.replace(/\n/g,'<br>')}<br><br>`; });
+    html += `<hr>`;
+    div.innerHTML = html;
+    wrap.appendChild(div);
+  });
+}
+</script>
+{% endblock %}

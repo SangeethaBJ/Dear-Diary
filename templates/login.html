@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="center-card">
+  <h2>Login</h2>
+  <form method="POST">
+    <label>Name</label>
+    <input name="name" required>
+    <label>Password</label>
+    <input name="password" type="password" required>
+    <div class="actions">
+      <button type="submit">Login</button>
+      <a class="btn" href="/register">Register</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Habit Tracker</h2>
+<button class="btn-warning" onclick="loadPrevious()">View Previous Entries</button>
+<div id="previous-entries"></div>
+
+<div>
+  <input id="new-habit" placeholder="Add a habit">
+  <button class="btn-info" onclick="addHabit()">Add Habit</button>
+</div>
+<div id="habits-wrap"></div>
+
+<div class="row">
+  <button class="btn-success" onclick="saveHabits()">Save</button>
+  <div id="habit-time" class="meta"></div>
+</div>
+
+<script>
+let habits = [];
+function addHabit(){
+  const v = document.getElementById('new-habit').value.trim();
+  if(!v) return;
+  habits.push({name:v, days:{}});
+  renderHabits();
+  document.getElementById('new-habit').value='';
+}
+function renderHabits(){
+  const wrap = document.getElementById('habits-wrap');
+  wrap.innerHTML='';
+  const days = 14;
+  habits.forEach((h,hi)=>{
+    const table = document.createElement('table');
+    table.className='habit-table';
+    let head = `<tr><th>${h.name}</th>`;
+    for(let i=1;i<=days;i++){ head += `<th>Day ${i}</th>`; }
+    head += `</tr>`; table.innerHTML = head;
+    const row = document.createElement('tr');
+    row.innerHTML = `<td></td>` + Array.from({length:days}).map((_,i)=>{
+      const key = 'd'+(i+1);
+      const checked = h.days[key] ? 'checked':''; 
+      return `<td><input type=checkbox data-h="${hi}" data-day="${key}" ${checked} onchange="toggleDay(this)"></td>`;
+    }).join('');
+    table.appendChild(row);
+    wrap.appendChild(table);
+  });
+}
+function toggleDay(el){
+  const hi = el.getAttribute('data-h');
+  const day = el.getAttribute('data-day');
+  habits[hi].days[day] = el.checked;
+}
+async function saveHabits(){
+  const res = await fetch('/save_entry',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({genre:'Habit Tracker', meta:{habits:habits}})
+  });
+  const j=await res.json();
+  document.getElementById('habit-time').innerText = j.time;
+  alert(j.message);
+}
+async function loadPrevious(){
+  const res = await fetch('/entries/Habit Tracker');
+  const entries = await res.json();
+  const wrap = document.getElementById('previous-entries');
+  wrap.innerHTML='';
+  if(entries.length === 0){ wrap.innerHTML = '<p>No previous entries.</p>'; return; }
+  entries.forEach(e=>{
+    const div = document.createElement('div');
+    div.className='prev-entry';
+    let html = `<strong>${e.created_at}</strong><table class="habit-table"><tr><th>Habit</th>`;
+    for(let i=1;i<=14;i++){ html += `<th>Day ${i}</th>`; }
+    html += `</tr>`;
+    e.meta.habits.forEach(h=>{
+      html += `<tr><td>${h.name}</td>`;
+      for(let i=1;i<=14;i++){ html += `<td>${h.days['d'+i]? '✔️' : ''}</td>`; }
+      html += `</tr>`;
+    });
+    html += `</table><hr>`;
+    div.innerHTML = html;
+    wrap.appendChild(div);
+  });
+}
+</script>
+{% endblock %}
