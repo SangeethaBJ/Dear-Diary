@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="admin-page">
-    <h2>Admin Dashboard</h2>
-    <p>Total Registered Users: <strong>{{ total_users }}</strong></p>
+    <h2>Admin Panel</h2>
+    <p>Total registered users: {{ total_users }}</p>
+
+    <h3>Usernames:</h3>
+    <ul>
+        {% for name in usernames %}
+            <li>{{ name }}</li>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}

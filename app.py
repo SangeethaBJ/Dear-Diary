@@ -184,20 +184,27 @@ def admin_page():
     if 'user_name' not in session or session['user_name'].lower() != 'sangeetha':
         return "Access Denied ❌", 403
 
-    # Connect to the database
     import sqlite3, os
     BASE = os.path.dirname(os.path.abspath(__file__))
     DB = os.path.join(BASE, "diary.db")
 
-    # Count users from your 'users' table
+    # Connect to the database
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
+
+    # Get total count
     cur.execute("SELECT COUNT(*) FROM users")
-    count = cur.fetchone()[0]
+    total_users = cur.fetchone()[0]
+
+    # Get all usernames
+    cur.execute("SELECT user_name FROM users")
+    usernames = [row[0] for row in cur.fetchall()]
+
     conn.close()
 
-    # Render the admin template
-    return render_template('admin.html', total_users=count)
+    # Pass to template
+    return render_template("admin.html", total_users=total_users, usernames=usernames)
+
 
 
     # Simple styled output
