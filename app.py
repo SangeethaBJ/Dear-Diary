@@ -188,22 +188,22 @@ def admin_page():
     BASE = os.path.dirname(os.path.abspath(__file__))
     DB = os.path.join(BASE, "diary.db")
 
-    # Connect to the database
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
 
-    # Get total count
+    # Get total users
     cur.execute("SELECT COUNT(*) FROM users")
     total_users = cur.fetchone()[0]
 
-    # Get all usernames
-    cur.execute("SELECT user_name FROM users")
+    # Get usernames
+    cur.execute("SELECT name FROM users")  # <-- Use 'name' column
     usernames = [row[0] for row in cur.fetchall()]
 
     conn.close()
 
     # Pass to template
     return render_template("admin.html", total_users=total_users, usernames=usernames)
+
 
 
 
