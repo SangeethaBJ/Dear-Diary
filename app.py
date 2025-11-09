@@ -196,6 +196,10 @@ def admin_page():
     count = cur.fetchone()[0]
     conn.close()
 
+    # Render the admin template
+    return render_template('admin.html', total_users=count)
+
+
     # Simple styled output
     return f"""
     <div style='
