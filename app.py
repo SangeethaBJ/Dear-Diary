@@ -178,5 +178,37 @@ def genre_challenge21():
 def genre_todo():
     return render_template('todo.html', user_name=session.get('user_name'))
 
+@app.route('/admin')
+def admin_page():
+    # Only you (Sangeetha) can access this
+    if 'user_name' not in session or session['user_name'].lower() != 'sangeetha':
+        return "Access Denied ❌", 403
+
+    # Connect to the database
+    import sqlite3, os
+    BASE = os.path.dirname(os.path.abspath(__file__))
+    DB = os.path.join(BASE, "diary.db")
+
+    # Count users from your 'users' table
+    conn = sqlite3.connect(DB)
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM users")
+    count = cur.fetchone()[0]
+    conn.close()
+
+    # Simple styled output
+    return f"""
+    <div style='
+        font-family: Poppins, sans-serif;
+        display:flex; flex-direction:column;
+        justify-content:center; align-items:center;
+        height:100vh; background:#f5f5f5;'>
+        <h2 style='color:#333;'>👑 Hello Sangeetha!</h2>
+        <p style='font-size:20px;'>Total Registered Users: 
+        <b style='color:#007bff;'>{count}</b></p>
+    </div>
+    """
+
+
 if __name__ == '__main__':
     app.run(debug=True)
