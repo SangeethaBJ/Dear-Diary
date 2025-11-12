@@ -17,6 +17,15 @@
 
 <script>
 let habits = [];
+window.onload = async function() {
+  const res = await fetch('/entries/Habit Tracker');
+  const data = await res.json();
+  if (data.length > 0 && data[0].meta.habits) {
+    habits = data[0].meta.habits;
+    document.getElementById('habit-time').innerText = data[0].created_at;
+  }
+  renderHabits();
+}
 function addHabit(){
   const v = document.getElementById('new-habit').value.trim();
   if(!v) return;

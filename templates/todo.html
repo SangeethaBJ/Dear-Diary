@@ -14,36 +14,85 @@
 </div>
 
 <script>
-let tasks=[];
-function addTask(){
-  const v=document.getElementById('new-task').value.trim();
-  if(!v) return;
-  tasks.push({task:v, done:false});
-  renderTasks(); document.getElementById('new-task').value='';
+let tasks = [];
+let completed = [];
+
+// Load saved tasks when page opens
+window.onload = async function() {
+  const res = await fetch('/entries/To Do');
+  const entries = await res.json();
+  if (entries.length > 0) {
+    // Load the latest entry
+    const last = entries[entries.length - 1];
+    tasks = last.meta.tasks.filter(t => !t.done); // keep only pending
+  }
+  renderTasks();
+};
+
+function addTask() {
+  const v = document.getElementById('new-task').value.trim();
+  if (!v) return;
+  tasks.push({ task: v, done: false });
+  renderTasks();
+  document.getElementById('new-task').value = '';
 }
-function renderTasks(){
-  const wrap=document.getElementById('tasks-wrap'); wrap.innerHTML='';
-  tasks.forEach((t,ti)=>{
-    const div=document.createElement('div');
-    div.className='task-item';
-    div.innerHTML=`<input type="checkbox" data-ti="${ti}" ${t.done?'checked':''} onchange="toggleTask(this)"> ${t.task}`;
+
+function renderTasks() {
+  const wrap = document.getElementById('tasks-wrap');
+  wrap.innerHTML = '';
+  tasks.forEach((t, ti) => {
+    const div = document.createElement('div');
+    div.className = 'task-item';
+    div.innerHTML = `
+      <input type="checkbox" data-ti="${ti}" ${t.done ? 'checked' : ''} onchange="toggleTask(this)"> 
+      ${t.task}
+    `;
     wrap.appendChild(div);
   });
 }
-function toggleTask(el){ const ti=el.getAttribute('data-ti'); tasks[ti].done=el.checked; }
-async function saveTasks(){
-  const res=await fetch('/save_entry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({genre:'To Do', meta:{tasks:tasks}})});
-  const j=await res.json(); document.getElementById('todo-time').innerText=j.time; alert(j.message);
+
+function toggleTask(el) {
+  const ti = el.getAttribute('data-ti');
+  if (el.checked) {
+    completed.push({ task: tasks[ti].task, done: true });
+    tasks.splice(ti, 1);
+  }
+  renderTasks();
 }
-async function loadPrevious(){
-  const res=await fetch('/entries/To Do'); const entries=await res.json();
-  const wrap=document.getElementById('previous-entries'); wrap.innerHTML='';
-  if(entries.length===0){ wrap.innerHTML='<p>No previous entries.</p>'; return; }
-  entries.forEach(e=>{
-    const div=document.createElement('div'); div.className='prev-entry';
-    let html=`<strong>${e.created_at}</strong><ul>`;
-    e.meta.tasks.forEach(t=>{ html+=`<li>${t.done?'✅':'⬜'} ${t.task}</li>`; });
-    html+='</ul><hr'; div.innerHTML=html; wrap.appendChild(div);
+
+async function saveTasks() {
+  // Combine completed + remaining tasks for saving
+  const allTasks = [...tasks, ...completed];
+  const res = await fetch('/save_entry', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ genre: 'To Do', meta: { tasks: allTasks } })
+  });
+  const j = await res.json();
+  document.getElementById('todo-time').innerText = j.time;
+  alert(j.message);
+  completed = []; // reset completed after saving
+}
+
+async function loadPrevious() {
+  const res = await fetch('/entries/To Do');
+  const entries = await res.json();
+  const wrap = document.getElementById('previous-entries');
+  wrap.innerHTML = '';
+  if (entries.length === 0) {
+    wrap.innerHTML = '<p>No previous entries.</p>';
+    return;
+  }
+  entries.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'prev-entry';
+    let html = `<strong>${e.created_at}</strong><ul>`;
+    e.meta.tasks.forEach(t => {
+      html += `<li>${t.done ? '✅' : '⬜'} ${t.task}</li>`;
+    });
+    html += '</ul><hr>';
+    div.innerHTML = html;
+    wrap.appendChild(div);
   });
 }
 </script>
